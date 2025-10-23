@@ -8,7 +8,7 @@ const bootstrapCams = [
   {name: "RC-619 TVS-42 ปากซอยวัดบุณย์กัญจนาราม",url: "https://stream2.ioc.pattaya.go.th/live/RC-619.m3u8?hls_ctx=o4t9lm36",lat: 12.8895075,lng: 100.8973051},
   {name: "SC-021 TVN-270 ถนนพัทยาใต้ ซ. 22",url: "https://stream2.ioc.pattaya.go.th/live/SC-021.m3u8?hls_ctx=4gyi763i",lat: 12.92395189,lng: 100.87934769},
   {name: "SC-020 TVN-269 ถนนพัทยาใต้ ซ. 22",url: "https://stream2.ioc.pattaya.go.th/live/SC-020.m3u8?hls_ctx=45r1463a",lat: 12.92395189,lng: 100.87934769},
-  {name: "TVA - 088 แยกวอยวัดธรรมแยกทางรถไฟ / แยกซอยวัดธรรมเลียบทางรถไฟ",url:"https://stream2.ioc.pattaya.go.th/live/SC-002-5275.ts?hls_ctx=63b004r7",lat:12.87808 ,lng:100.906047 },
+  {name: "TVA - 088 แยกซอยวัดธรรมเลียบทางรถไฟ",url:"https://stream2.ioc.pattaya.go.th/live/SC-002-5275.ts?hls_ctx=63b004r7",lat:12.87808 ,lng:100.906047 },
   {name: "CC-002 TVA-18 จุดกลับรถโชคดีค้าไม้",url:"https://stream1.ioc.pattaya.go.th/live/CC-002.m3u8?hls_ctx=69rkl7s3",lat: 12.946846,lng: 100.905277},
   {name: "NC-351 ATC-14 14-แยกปริญญา",url:"https://stream1.ioc.pattaya.go.th/live/NC-351.m3u8?hls_ctx=u2496253",lat: 12.949934,lng: 100.897356}
 ];
@@ -257,3 +257,4 @@ window.onload = () => {
     selectCamera(0);
   }
 };
+
