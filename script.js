@@ -1,76 +1,20 @@
 // Bootstrap Camera Data ข้อมูลกล้องวงจรปิด
 const bootstrapCams = [
   {name: "SC-014 TVA-60 จุดกลับรถเขาตาโล",url: "https://stream2.ioc.pattaya.go.th/live/SC-014.m3u8?hls_ctx=aq1o4098",lat: 12.91006,lng: 100.8959148},
-  {name: "SC-015 TVA-61 จุดกลับรถเขาตาโล",url: "https://stream2.ioc.pattaya.go.th/live/SC-015.m3u8?hls_ctx=301iuj73",lat: 12.9100652,lng: 100.8959155  },
-  {
-    name: "SC-016 ATC-1 แยกสุขุมวิท-เขาตาโล",
-    url: "https://stream2.ioc.pattaya.go.th/live/RC-590.m3u8?hls_ctx=3e056imt",
-    lat: 12.910069,
-    lng: 100.895912
-  },
-  {
-    name: "SC-195 TVA-97 แยกชัยพฤกษ์ 2 เลียบทางรถไฟ",
-    url: "https://stream1.ioc.pattaya.go.th/live/SC-195.m3u8?hls_ctx=i2745z37",
-    lat: 12.88222,
-    lng: 100.904293
-  },
-  {
-    name: "SC-008 TVA-89 แยกเขาตาโลเลียบทางรถไฟ",
-    url: "https://stream2.ioc.pattaya.go.th/live/SC-008.m3u8?hls_ctx=92csjp78",
-    lat: 12.9091033,
-    lng: 100.9012205
-  },
-  {
-    name: "RC-619 TVS-42 ปากซอยวัดบุณย์กัญจนาราม",
-    url: "https://stream2.ioc.pattaya.go.th/live/RC-619.m3u8?hls_ctx=o4t9lm36",
-    lat: 12.8895075,
-    lng: 100.8973051
-  },
-  {
-    name: "SC-021 TVN-270 ถนนพัทยาใต้ ซ. 22",
-    url: "https://stream2.ioc.pattaya.go.th/live/SC-021.m3u8?hls_ctx=4gyi763i",
-    lat: 12.92395189,
-    lng: 100.87934769
-  },
-  {
-    name: "SC-020 TVN-269 ถนนพัทยาใต้ ซ. 22",
-    url: "https://stream2.ioc.pattaya.go.th/live/SC-020.m3u8?hls_ctx=45r1463a",
-    lat: 12.92395189,
-    lng: 100.87934769
-  },
-  {
-    name: "NC-350 ATC-13 13-แยกปริญญา",
-    url:
-      "https://stream1.ioc.pattaya.go.th/live/NC-350-4075.ts?hls_ctx=7614701g",
-    lat: 12.949934,
-    lng: 100.897356
-  },
-  {
-    name: "NC-351 ATC-14 14-แยกปริญญา",
-    url:
-      "https://stream1.ioc.pattaya.go.th/live/NC-351-4083.ts?hls_ctx=17858f01",
-    lat: 12.949934,
-    lng: 100.897356
-  },
-  {
-    name: "CC-333 TVN-263 ถนนพัทยาใต้ – ซอย 16 (บงกช)",
-    url:
-      "https://stream1.ioc.pattaya.go.th/live/CC-333-4053.ts?hls_ctx=e9k2q299",
-    lat: 12.92135147,
-    lng: 100.88742699
-  }
+  {name: "SC-015 TVA-61 จุดกลับรถเขาตาโล",url: "https://stream2.ioc.pattaya.go.th/live/SC-015.m3u8?hls_ctx=301iuj73",lat: 12.9100652,lng: 100.8959155},
+  {name: "SC-016 ATC-1 แยกสุขุมวิท-เขาตาโล",url: "https://stream2.ioc.pattaya.go.th/live/RC-590.m3u8?hls_ctx=3e056imt",lat: 12.910069,lng: 100.895912},
+  {name: "SC-195 TVA-97 แยกชัยพฤกษ์ 2 เลียบทางรถไฟ",url: "https://stream1.ioc.pattaya.go.th/live/SC-195.m3u8?hls_ctx=i2745z37",lat: 12.88222,lng: 100.904293},
+  {name: "SC-008 TVA-89 แยกเขาตาโลเลียบทางรถไฟ",url: "https://stream2.ioc.pattaya.go.th/live/SC-008.m3u8?hls_ctx=92csjp78",lat: 12.9091033,lng: 100.9012205},
+  {name: "RC-619 TVS-42 ปากซอยวัดบุณย์กัญจนาราม",url: "https://stream2.ioc.pattaya.go.th/live/RC-619.m3u8?hls_ctx=o4t9lm36",lat: 12.8895075,lng: 100.8973051},
+  {name: "SC-021 TVN-270 ถนนพัทยาใต้ ซ. 22",url: "https://stream2.ioc.pattaya.go.th/live/SC-021.m3u8?hls_ctx=4gyi763i",lat: 12.92395189,lng: 100.87934769},
+  {name: "SC-020 TVN-269 ถนนพัทยาใต้ ซ. 22",url: "https://stream2.ioc.pattaya.go.th/live/SC-020.m3u8?hls_ctx=45r1463a",lat: 12.92395189,lng: 100.87934769},
+  {name: "TVA - 088 แยกวอยวัดธรรมแยกทางรถไฟ / แยกซอยวัดธรรมเลียบทางรถไฟ",url:"https://stream2.ioc.pattaya.go.th/live/SC-002-5275.ts?hls_ctx=63b004r7",lat:12.87808 ,lng:100.906047 },
+  {name: "CC-002 TVA-18 จุดกลับรถโชคดีค้าไม้",url:"https://stream1.ioc.pattaya.go.th/live/CC-002.m3u8?hls_ctx=69rkl7s3",lat: 12.946846,lng: 100.905277},
+  {name: "NC-351 ATC-14 14-แยกปริญญา",url:"https://stream1.ioc.pattaya.go.th/live/NC-351.m3u8?hls_ctx=u2496253",lat: 12.949934,lng: 100.897356}
 ];
 // Global Variables
-let map,
-  miniMap,
-  markers = [],
-  cameras = [...bootstrapCams],
-  currentCamera = null;
-let showMarkers = true,
-  showMyLocation = false,
-  myLocationMarker = null,
-  hls = null,
-  currentBasemap = null;
+let map,miniMap,markers = [],cameras = [...bootstrapCams],currentCamera = null;
+let showMarkers = true,showMyLocation = false,myLocationMarker = null,hls = null,currentBasemap = null;
 
 // Camera Icon
 const cameraIcon = L.icon({
