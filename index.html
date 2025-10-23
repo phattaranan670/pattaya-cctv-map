@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กล้อง CCTV เมืองพัทยา</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css"/>
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- External JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+ 
+    
+</head>
+<body>
+    <!-- Header Section -->
+    <div id="header">
+        <h1>🎥 กล้อง CCTV เมืองพัทยา</h1>
+        <div id="controls">
+            <input type="text" id="searchInput" placeholder="ค้นหาชื่อกล้อง...">
+            <button class="btn" onclick="zoomOut()">เมืองพัทยา</button>
+            <button class="btn" onclick="importJSON()">Import JSON</button>
+            <button class="btn" onclick="exportJSON()">Export JSON</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="mainContainer">
+        <!-- Map Section -->
+        <div id="mapSection">
+            <div id="basemapSelector">
+                <select id="basemapSelect" onchange="changeBasemap()">
+                    <option value="satellite">Satellite</option>
+                    <option value="street">Street Map</option>
+                    <option value="terrain">Terrain</option>
+                    <option value="dark">Dark Mode</option>
+                </select>
+            </div>
+
+            <div id="map"></div>
+            <button class="locate-button" id="locateBtn" title="หาตำแหน่งของฉัน" onclick="toggleMyLocation()">
+                <svg class="locate-icon" viewBox="0 0 24 24">
+                     <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                </svg>
+            </button>
+
+            <div id="miniMap"></div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div id="rightSidebar">
+            <!-- Video Preview -->
+            <div id="videoPreview">
+                <h2>CCTV LIVE</h2>
+                <div id="locationLabel">ตำแหน่งกล้อง</div>
+                <video id="videoPlayer" controls autoplay muted></video>
+            </div>
+
+            <!-- Camera List -->
+            <div id="cameraList">
+                <h2>รายการกล้อง</h2>
+                <div id="cameraItems"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Main Script -->
+    <script src="script.js"></script>
+</body>
+</html>
