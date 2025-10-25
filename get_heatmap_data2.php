@@ -1,151 +1,149 @@
 <?php
-// ============================================
-// 🗺️ Heatmap Data API for InfinityFree
-// ใช้กับ MySQL Database บน VistaPanel
-// ============================================
-
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: https://phattaranan670.github.io'); 
+header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Handle preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+// ข้อมูลการเชื่อมต่อ InfinityFree
+$host = "sql101.infinityfree.com";
+$username = "if0_40255240";
+$password = "e0W3g1B5JokMM";
+$dbname = "if0_40255240_heatmap";
 
-// =====================================================
-// 📋 MySQL Database Configuration
-// ⚠️ ข้อมูลจาก VistaPanel ของคุณ
-// =====================================================
-$host = "sql309.infinityfree.com";     // ✅ MySQL Hostname
-$user = "if0_40240291";                // ✅ MySQL Username
-$pass = "bIL1YX6iQxv";                 // ✅ MySQL Password
-$dbname = "if0_40240291_postgres";    // ⚠️ แก้เป็นชื่อ MySQL Database ที่สร้างจริง
-
-// ⚠️ ถ้าคุณยังใช้ชื่อ database เดิม แก้เป็น:
-// $dbname = "if0_40240291_postgres";  // แต่นี่คือ MySQL ไม่ใช่ PostgreSQL นะ
-
-// =====================================================
-// 🌐 เชื่อมต่อฐานข้อมูล MySQL
-// =====================================================
-$conn = new mysqli($host, $user, $pass, $dbname);
+// เชื่อมต่อฐานข้อมูล
+$conn = new mysqli($host, $username, $password, $dbname);
 
 // ตรวจสอบการเชื่อมต่อ
 if ($conn->connect_error) {
     http_response_code(500);
-    echo json_encode([
-        "success" => false,
-        "error" => "เชื่อมต่อฐานข้อมูลไม่ได้",
-        "message" => $conn->connect_error,
-        "hint" => "ตรวจสอบ: 1) ชื่อ database ถูกต้องหรือไม่ 2) สร้าง database แล้วหรือยัง 3) username/password ถูกต้องหรือไม่"
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    exit;
+    die(json_encode([
+        'success' => false, 
+        'error' => 'Connection failed: ' . $conn->connect_error,
+        'details' => 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้'
+    ]));
 }
 
-// ตั้งค่า charset
+// Set charset เป็น UTF-8
 $conn->set_charset("utf8mb4");
 
-// =====================================================
-// 📊 ดึงข้อมูลจากตาราง
-// =====================================================
+// รับพารามิเตอร์สำหรับกรองข้อมูล (ถ้ามี)
+$camera_id = isset($_GET['camera_id']) ? $_GET['camera_id'] : null;
+$start_date = isset($_GET['start_date']) ? $_GET['start_date'] : null;
+$end_date = isset($_GET['end_date']) ? $_GET['end_date'] : null;
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 1000;
 
 // ตรวจสอบว่าตารางมีอยู่หรือไม่
-$check_table = "SHOW TABLES LIKE 'accident_data'";
-$table_exists = $conn->query($check_table);
-
-if ($table_exists->num_rows == 0) {
+$tableCheck = $conn->query("SHOW TABLES LIKE 'accident_detection'");
+if ($tableCheck->num_rows == 0) {
     http_response_code(500);
     echo json_encode([
-        "success" => false,
-        "error" => "ไม่พบตาราง accident_data",
-        "hint" => "กรุณารัน SQL สร้างตารางจากไฟล์ create_mysql_tables.sql ใน phpMyAdmin ก่อน",
-        "database" => $dbname
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        'success' => false,
+        'error' => 'Table accident_detection does not exist',
+        'details' => 'กรุณาสร้างตาราง accident_detection ก่อนใช้งาน',
+        'solution' => 'ใช้ไฟล์ accident_detection.sql ใน phpMyAdmin'
+    ]);
     $conn->close();
     exit;
 }
 
-// ดึงข้อมูล
-$query = "
-    SELECT 
-        id, 
-        timestamp, 
-        camera_id, 
-        lat, 
-        lon,
-        severity,
-        status,
-        description
-    FROM accident_data 
-    ORDER BY timestamp DESC
-    LIMIT 1000
-";
+// สร้าง SQL query แบบไดนามิก
+$sql = "SELECT 
+            id,
+            camera_id,
+            timestamp,
+            lat,
+            lon
+        FROM accident_detection
+        WHERE 1=1";
 
-$result = $conn->query($query);
+// เพิ่มเงื่อนไขการกรอง
+$params = [];
+$types = "";
 
-// ถ้าดึงข้อมูลไม่ได้
+if ($camera_id) {
+    $sql .= " AND camera_id = ?";
+    $params[] = $camera_id;
+    $types .= "s";
+}
+
+if ($start_date) {
+    $sql .= " AND timestamp >= ?";
+    $params[] = $start_date;
+    $types .= "s";
+}
+
+if ($end_date) {
+    $sql .= " AND timestamp <= ?";
+    $params[] = $end_date;
+    $types .= "s";
+}
+
+$sql .= " ORDER BY timestamp DESC LIMIT ?";
+$params[] = $limit;
+$types .= "i";
+
+// เตรียม statement
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Prepare failed: ' . $conn->error,
+        'details' => 'เกิดข้อผิดพลาดในการเตรียม SQL query'
+    ]);
+    $conn->close();
+    exit;
+}
+
+// Bind parameters ถ้ามี
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+// Execute query
+$stmt->execute();
+$result = $stmt->get_result();
+
 if (!$result) {
     http_response_code(500);
     echo json_encode([
-        "success" => false,
-        "error" => "ไม่สามารถดึงข้อมูลจากตารางได้",
-        "message" => $conn->error,
-        "query" => $query
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        'success' => false,
+        'error' => 'Query execution failed: ' . $stmt->error,
+        'details' => 'เกิดข้อผิดพลาดในการดึงข้อมูล'
+    ]);
+    $stmt->close();
     $conn->close();
     exit;
 }
 
-// =====================================================
-// 🔄 แปลงผลลัพธ์เป็น JSON Array
-// =====================================================
 $data = [];
-while ($row = $result->fetch_assoc()) {
-    // คำนวณน้ำหนักสำหรับ heatmap
-    $weight = 1.0;
-    if (isset($row["severity"])) {
-        switch ($row["severity"]) {
-            case 'low':
-                $weight = 0.5;
-                break;
-            case 'medium':
-                $weight = 1.0;
-                break;
-            case 'high':
-                $weight = 2.0;
-                break;
-            default:
-                $weight = 1.0;
-        }
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+        $data[] = [
+            'id' => (int)$row['id'],
+            'camera_id' => $row['camera_id'],
+            'timestamp' => $row['timestamp'],
+            'lat' => (float)$row['lat'],
+            'lon' => (float)$row['lon']
+        ];
     }
-    
-    $data[] = [
-        "id" => (int)$row["id"],
-        "timestamp" => $row["timestamp"],
-        "camera_id" => $row["camera_id"],
-        "lat" => (float)$row["lat"],
-        "lng" => (float)$row["lon"],     // ใช้ lng สำหรับ Leaflet
-        "long" => (float)$row["lon"],    // ใช้ long สำหรับ backward compatibility
-        "weight" => $weight,              // น้ำหนักสำหรับ heatmap
-        "severity" => $row["severity"] ?? "medium",
-        "status" => $row["status"] ?? "pending",
-        "description" => $row["description"] ?? ""
-    ];
 }
 
-// =====================================================
-// 📤 ส่งข้อมูลออกเป็น JSON
-// =====================================================
+// ส่งผลลัพธ์
 echo json_encode([
-    "success" => true,
-    "count" => count($data),
-    "database" => $dbname,
-    "data" => $data
+    'success' => true,
+    'data' => $data,
+    'count' => count($data),
+    'filters' => [
+        'camera_id' => $camera_id,
+        'start_date' => $start_date,
+        'end_date' => $end_date,
+        'limit' => $limit
+    ],
+    'timestamp' => date('Y-m-d H:i:s')
 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
+$stmt->close();
 $conn->close();
-
 ?>
