@@ -5,6 +5,7 @@
 // ============================================
 
 header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: https://phattaranan670.github.io'); 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -146,4 +147,5 @@ echo json_encode([
 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 $conn->close();
+
 ?>
