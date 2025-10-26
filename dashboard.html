@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
     <script src="https://cdn.jsdelivr.net/gh/python-visualization/folium@main/folium/templates/leaflet_heat.min.js"></script>
+    <script src="mock-data.js"></script>
     
     <style>
         * {
@@ -662,25 +663,18 @@
         2024: Array(12).fill(0)
     };
 
-    // ฟังก์ชันดึงข้อมูลจาก API
+    // ฟังก์ชันดึงข้อมูล (ใช้ Mock Data สำหรับ GitHub Pages)
     function loadData() {
         console.log('📡 Loading data...');
-        document.getElementById('loadingStatus').textContent = 'กำลังเชื่อมต่อ API...';
+        document.getElementById('loadingStatus').textContent = 'กำลังโหลดข้อมูล...';
         
-        // ใช้ URL เต็ม เหมือนไฟล์ที่ทำงาน
-        const url = 'https://pattaya-cctv-kku.infinityfreeapp.com/get_heatmap_data.php?limit=1000';
-        
-        fetch(url)
-            .then(response => {
-                console.log('📡 Response:', response.status);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return response.json();
-            })
+        // ใช้ Mock Data แทน API
+        fetchMockData()
             .then(result => {
                 console.log('✅ Data received:', result);
                 
                 if (!result.success) {
-                    throw new Error(result.error || 'API Error');
+                    throw new Error('Error loading mock data');
                 }
                 
                 // เก็บข้อมูลดิบ
@@ -691,8 +685,8 @@
                         id: d.id,
                         camera_id: d.camera_id,
                         timestamp: d.timestamp,
-                        lat: parseFloat(d.lat || d.latitude || 0),
-                        lon: parseFloat(d.lon || d.longitude || 0)
+                        lat: parseFloat(d.lat),
+                        lon: parseFloat(d.lon)
                     }));
                 }
                 
