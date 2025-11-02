@@ -24,9 +24,9 @@ ini_set('display_errors', 1);
 // 📋 MySQL Database Configuration
 // =====================================================
 $host = "localhost";
-$user = "accident_detection";
+$user = "postgres";
 $pass = "postgres";
-$dbname = "postgres";
+$dbname = "accident_detection";
 
 // =====================================================
 // 🌐 เชื่อมต่อฐานข้อมูล MySQL
