@@ -20,7 +20,7 @@
   // Roboflow Configuration (ถ้าต้องการใช้)
   const ROBOFLOW = {
     apiUrl: 'https://serverless.roboflow.com/detection-accident-yb0lz-g9hc9/1',  // ใส่ Roboflow API URL
-    apiKey: 'rf_vU8G4AYeMuUzaRjVw8DdRDKMiFh2',  // ใส่ Roboflow API Key
+    apiKey: 'evLVrAROGlWWdQOMUPaz',  // ใส่ Roboflow API Key
     confidence: 40,
     overlap: 30
   };
