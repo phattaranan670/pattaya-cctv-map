@@ -23,10 +23,10 @@ ini_set('display_errors', 1);
 // =====================================================
 // 📋 MySQL Database Configuration
 // =====================================================
-$host = "sql101.infinityfree.com";
-$user = "if0_40255240";
-$pass = "e0W3g1B5JokMM";
-$dbname = "if0_40255240_heatmap";
+$host = "localhost";
+$user = "accident_detection";
+$pass = "postgres";
+$dbname = "postgres";
 
 // =====================================================
 // 🌐 เชื่อมต่อฐานข้อมูล MySQL
