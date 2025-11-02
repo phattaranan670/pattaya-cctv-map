@@ -446,7 +446,14 @@ function updateMap() {
 // ================================================================
 
 console.log('🗺 Initializing map...');
-map = L.map('map').setView(initialCenter, initialZoom);
+map = L.map('map', {
+    zoomControl: false  // ปิด zoom control แบบ default
+}).setView(initialCenter, initialZoom);
+
+// เพิ่ม zoom control ที่มุมขวาบน
+L.control.zoom({
+    position: 'topright'
+}).addTo(map);
     
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -1211,6 +1218,34 @@ function togglePlay() {
         }
     }
     isPlaying = !isPlaying;
+}
+
+// ================================================================
+// SIDEBAR TOGGLE EVENT LISTENERS
+// ================================================================
+
+// ปุ่มปิด Sidebar (ปุ่ม X)
+const toggleSidebar = document.getElementById("toggleSidebar");
+if (toggleSidebar) {
+    toggleSidebar.addEventListener("click", function() {
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar) {
+            sidebar.classList.toggle("collapsed");
+            console.log('🔄 Sidebar toggled (X button)');
+        }
+    });
+}
+
+// ปุ่มเปิด Sidebar (ปุ่มแฮมเบอร์เกอร์)
+const toggleDesktop = document.getElementById("toggleDesktop");
+if (toggleDesktop) {
+    toggleDesktop.addEventListener("click", function() {
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar) {
+            sidebar.classList.toggle("collapsed");
+            console.log('🔄 Sidebar toggled (hamburger button)');
+        }
+    });
 }
 
 // ================================================================
