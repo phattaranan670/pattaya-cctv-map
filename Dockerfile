@@ -1,28 +1,21 @@
-# Base image: Debian + Python + Apache + PHP
-FROM python:3.11-slim
+# ✅ ใช้ base image ที่มี YOLO + Torch + OpenCV อยู่แล้ว
+FROM ultralytics/ultralytics:latest
 
-# ติดตั้ง PHP, Apache และ dependencies
+# ✅ ติดตั้ง Apache และ PHP (ใช้ libapache2-mod-php)
 RUN apt-get update && apt-get install -y \
     apache2 \
     php \
     libapache2-mod-php \
-    && apt-get clean
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# สร้าง virtual environment สำหรับ Python
-RUN python3 -m venv /venv
-ENV PATH="/venv/bin:$PATH"
-
-# ติดตั้ง YOLO และ library ที่ต้องใช้
-RUN pip install ultralytics torch torchvision opencv-python
-
-# คัดลอกไฟล์เว็บทั้งหมด
-COPY . /var/www/html/
-
-# กำหนด working directory
+# ✅ ตั้ง working directory
 WORKDIR /var/www/html
 
-# เปิดพอร์ต 80
+# ✅ คัดลอกไฟล์โปรเจกต์ทั้งหมดเข้าไป
+COPY . /var/www/html/
+
+# ✅ เปิดพอร์ต 80
 EXPOSE 80
 
-# รัน Apache
+# ✅ สั่งรัน Apache (foreground mode สำหรับ Docker)
 CMD ["apache2-foreground"]
