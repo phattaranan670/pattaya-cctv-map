@@ -1,26 +1,26 @@
 // detection.js - Enhanced Multi-Engine Detection System
-// Supports: Local (COCO-SSD/YOLO auto), YOLOv11 API, Roboflow API
-// Integrated with Pattaya CCTV System
+// Integrated with Railway.app FastAPI + YOLOv11
+// Supports: Local (COCO-SSD), YOLOv11 Railway API, Roboflow API
 
 (() => {
   'use strict';
 
   /* ==================== CONFIGURATION ==================== */
   
-  // YOLO Configuration
+  // 🚀 Railway API Configuration (YOLOv11)
   const YOLO = {
-    // ✅ Github API (กำลังใช้งาน)
-    apiUrl: 'https://github.com/phattaranan670/pattaya-cctv-map/releases/download/v1/best.pt',
+    // ✅ เปลี่ยนเป็น Railway API URL ของคุณ
+    apiUrl: 'https://your-app-name.railway.app/detect',  // ⬅️ เปลี่ยนตรงนี้!
     imgSize: 640,
     minConfAccident: 0.55,
     minConfVehicle: 0.25,
-    timeout: 10000  // 10 seconds timeout
+    timeout: 30000  // 30 seconds
   };
 
-  // Roboflow Configuration (ถ้าต้องการใช้)
+  // Roboflow Configuration (สำรอง)
   const ROBOFLOW = {
-    apiUrl: 'https://serverless.roboflow.com/detection-accident-yb0lz-g9hc9/1',  // ใส่ Roboflow API URL
-    apiKey: 'evLVrAROGlWWdQOMUPaz',  // ใส่ Roboflow API Key
+    apiUrl: 'https://serverless.roboflow.com/detection-accident-yb0lz-g9hc9/1',
+    apiKey: 'evLVrAROGlWWdQOMUPaz',
     confidence: 40,
     overlap: 30
   };
@@ -31,9 +31,9 @@
 
   // Accident Detection Rules
   const STRICT = {
-    minFramesConfirm: 3,        // ต้องเห็นต่อเนื่องกี่เฟรม
-    rfTrigger: 0.55,             // เกณฑ์เริ่มต้น
-    rfRelease: 0.50,             // เกณฑ์คงสถานะ
+    minFramesConfirm: 3,
+    rfTrigger: 0.55,
+    rfRelease: 0.50,
     maxBoxAreaRatio: 0.45,
     minBoxAreaRatio: 0.002,
     minBoxWH: 24,
@@ -66,8 +66,8 @@
   
   const els = {
     toggleBtn: document.getElementById('detectionBtn'),
-    startBtn: document.getElementById('detectStartBtn') || document.getElementById('detectionStartBtn'),
-    stopBtn: document.getElementById('detectStopBtn') || document.getElementById('detectionStopBtn') || document.getElementById('stopBtn'),
+    startBtn: document.getElementById('detectStartBtn'),
+    stopBtn: document.getElementById('detectStopBtn'),
     engineSel: document.getElementById('engineSelect'),
     intervalSel: document.getElementById('intervalSelect'),
     beepToggle: document.getElementById('beepToggle'),
@@ -93,10 +93,10 @@
   let lastAccBox = null;
   let accidentActive = false;
   let lastAccidentTime = 0;
-  const ACCIDENT_COOLDOWN = 5000; // 5 seconds
+  const ACCIDENT_COOLDOWN = 5000;
 
   // Engine mode
-  let ENGINE = 'local'; // 'local', 'yolo', 'roboflow', 'both', 'off'
+  let ENGINE = 'both'; // 'local', 'both', 'roboflow', 'off'
 
   /* ==================== UI BINDINGS ==================== */
   
@@ -110,7 +110,7 @@
       console.log('[Detection] Engine changed to:', ENGINE);
       if (ENGINE === 'off' && running) stopDetection();
     };
-    ENGINE = els.engineSel.value || 'local';
+    ENGINE = els.engineSel.value || 'both';
   }
 
   if (els.intervalSel) {
@@ -145,6 +145,7 @@
     if (running) return;
     if (ENGINE === 'off') {
       console.log('[Detection] Engine is OFF');
+      banner('Detection ถูกปิด', 'info');
       return;
     }
 
@@ -157,7 +158,7 @@
     console.log('[Detection] Starting with engine:', ENGINE);
 
     // Load COCO-SSD if needed
-    if ((ENGINE === 'local' || ENGINE === 'both') && !coco) {
+    if (ENGINE === 'local' && !coco) {
       try {
         console.log('[Detection] Loading COCO-SSD...');
         if (window.tf?.setBackend) await tf.setBackend('webgl');
@@ -169,7 +170,7 @@
           coco = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
         } catch (e2) {
           console.error('[Detection] Failed to load COCO-SSD', e2);
-          banner('โหลด COCO-SSD ไม่สำเร็จ');
+          banner('โหลด COCO-SSD ไม่สำเร็จ', 'error');
           running = false;
           updateUI();
           return;
@@ -180,7 +181,7 @@
     syncCanvas();
     scheduleNext(true);
     updateUI();
-    banner('Detection เริ่มทำงาน...', 'info');
+    banner('Detection เริ่มทำงาน... (Engine: ' + ENGINE + ')', 'info');
   }
 
   function stopDetection() {
@@ -216,7 +217,7 @@
     if (els.stopBtn) els.stopBtn.disabled = !running;
     if (els.toggleBtn) {
       els.toggleBtn.classList.toggle('active', running);
-      els.toggleBtn.textContent = running ? '🛑 หยุด' : '🚨 Detection';
+      els.toggleBtn.textContent = running ? '🛑 หยุด ' : '🚨 เริ่ม';
     }
   }
 
@@ -277,32 +278,18 @@
       if (ENGINE === 'local') {
         const localPreds = await runCOCO(frame, upW, upH);
         allDetections = localPreds;
-        // Check for accidents using overlap/density
         accidentDetections = detectAccidentsByRules(localPreds);
       } 
-      else if (ENGINE === 'yolo') {
-        const yoloResult = await callYOLO(frame);
-        allDetections = [...yoloResult.vehicles, ...yoloResult.accidents];
+      else if (ENGINE === 'both') {
+        // 🚀 ใช้ Railway YOLOv11 API
+        const yoloResult = await callRailwayYOLO(frame);
+        allDetections = yoloResult.accidents;
         accidentDetections = yoloResult.accidents;
       }
       else if (ENGINE === 'roboflow') {
         const roboResult = await callRoboflow(frame);
         allDetections = roboResult.all || [];
         accidentDetections = roboResult.accidents || [];
-      }
-      else if (ENGINE === 'both') {
-        const [localPreds, yoloResult] = await Promise.all([
-          runCOCO(frame, upW, upH),
-          callYOLO(frame)
-        ]);
-        allDetections = [...localPreds, ...yoloResult.vehicles];
-        accidentDetections = yoloResult.accidents;
-        
-        // Add rule-based detection
-        const ruleAccidents = detectAccidentsByRules(localPreds);
-        if (ruleAccidents.length > 0) {
-          accidentDetections = [...accidentDetections, ...ruleAccidents];
-        }
       }
 
       if (!running || myRun !== activeRunId) return;
@@ -355,6 +342,15 @@
             accidentActive = true;
             lastAccidentTime = now;
             
+            // 🔴 ส่งข้อมูลไป Backend เพื่อบันทึก Database
+            saveAccidentToDatabase({
+              camera: els.camLabel?.textContent || 'Unknown',
+              lat: window.currentCamera?.lat || 0,
+              lng: window.currentCamera?.lng || 0,
+              confidence: topAccident?.score ?? 1,
+              timestamp: new Date().toISOString()
+            });
+
             window.dispatchEvent(new CustomEvent('accident', {
               detail: {
                 box: lastAccBox,
@@ -388,6 +384,103 @@
     }
   }
 
+  /* ==================== RAILWAY YOLO API ==================== */
+  
+  async function callRailwayYOLO(frameCanvas) {
+    if (!YOLO.apiUrl || YOLO.apiUrl.includes('your-app-name')) {
+      console.warn('[YOLO] Railway API URL not configured!');
+      banner('⚠️ ยังไม่ได้ตั้งค่า Railway API URL', 'warning');
+      return { vehicles: [], accidents: [] };
+    }
+
+    const base64 = frameCanvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), YOLO.timeout);
+
+      console.log('[YOLO] Sending to Railway API:', YOLO.apiUrl);
+
+      const response = await fetch(YOLO.apiUrl, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          imageBase64: base64,
+          confidence: YOLO.minConfAccident,
+          imgsz: YOLO.imgSize
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.warn('[YOLO] HTTP error:', response.status, errorText);
+        banner(`Railway API Error: ${response.status}`, 'error');
+        return { vehicles: [], accidents: [] };
+      }
+
+      const result = await response.json();
+      console.log('[YOLO] Railway API response:', result);
+
+      // Parse predictions from FastAPI format
+      const predictions = result.predictions || [];
+
+      const preds = predictions.map(p => ({
+        class: String(p.class || '').toLowerCase(),
+        score: Number(p.confidence || 0),
+        bbox: [
+          p.x - p.width/2,   // convert center to top-left
+          p.y - p.height/2,
+          p.width,
+          p.height
+        ]
+      }));
+
+      const accidents = preds
+        .filter(p => isAccidentName(p.class))
+        .filter(p => p.score >= YOLO.minConfAccident)
+        .sort((a, b) => b.score - a.score);
+
+      console.log('[YOLO] Detected:', accidents.length, 'accidents');
+      return { vehicles: [], accidents };
+
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        console.warn('[YOLO] Railway API timeout');
+        banner('Railway API ใช้เวลานานเกินไป', 'warning');
+      } else {
+        console.error('[YOLO] Network error:', e);
+        banner('ไม่สามารถเชื่อมต่อ Railway API', 'error');
+      }
+      return { vehicles: [], accidents: [] };
+    }
+  }
+
+  /* ==================== SAVE TO DATABASE ==================== */
+  
+  async function saveAccidentToDatabase(data) {
+    try {
+      const response = await fetch('save_accident.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('[Database] Saved:', result);
+      } else {
+        console.warn('[Database] Save failed:', response.status);
+      }
+    } catch (e) {
+      console.error('[Database] Error:', e);
+    }
+  }
+
   /* ==================== COCO-SSD (LOCAL) ==================== */
   
   async function runCOCO(frame, w, h) {
@@ -401,88 +494,11 @@
         .map(p => ({
           class: p.class === 'person' ? 'person' : canonVehicle(p.class),
           score: p.score,
-          bbox: p.bbox // [x, y, width, height]
+          bbox: p.bbox
         }));
     } catch (e) {
       console.error('[COCO-SSD] Error:', e);
       return [];
-    }
-  }
-
-  /* ==================== YOLO API ==================== */
-  
-  async function callYOLO(frameCanvas) {
-    // ✅ ตรวจสอบว่ามี API URL หรือไม่
-    if (!YOLO.apiUrl || YOLO.apiUrl.trim() === '') {
-      console.log('[YOLO] API URL not configured - skipping YOLO detection');
-      return { vehicles: [], accidents: [] };
-    }
-
-    const base64 = frameCanvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-    
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), YOLO.timeout);
-
-      const response = await fetch(YOLO.apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          data: [
-            base64,
-            YOLO.minConfVehicle,
-            YOLO.imgSize
-          ]
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.warn('[YOLO] HTTP error:', response.status);
-        return { vehicles: [], accidents: [] };
-      }
-
-      const result = await response.json();
-      console.log('[YOLO] Raw API response:', result);
-
-      // Gradio response format: { data: [{ success: true, predictions: [...] }] }
-      const apiResult = result.data?.[0];
-
-      if (!apiResult || !apiResult.success) {
-        console.warn('[YOLO] API returned error:', apiResult?.error || 'Unknown error');
-        return { vehicles: [], accidents: [] };
-      }
-
-      // Parse predictions from API
-      const preds = (apiResult.predictions || []).map(p => ({
-        class: String(p.class || '').toLowerCase(),
-        score: Number(p.confidence || 0),
-        bbox: [p.x - p.width/2, p.y - p.height/2, p.width, p.height] // center to corner
-      }));
-
-      const vehicles = preds
-        .filter(p => ALL_VEHICLE_NAMES.includes(p.class) || Object.keys(VEHICLE_CLASSES).includes(p.class))
-        .map(p => ({ ...p, class: canonVehicle(p.class) }))
-        .filter(p => p.score >= YOLO.minConfVehicle);
-
-      const accidents = preds
-        .filter(p => isAccidentName(p.class))
-        .filter(p => p.score >= YOLO.minConfAccident)
-        .sort((a, b) => b.score - a.score);
-
-      console.log('[YOLO] Detected:', vehicles.length, 'vehicles,', accidents.length, 'accidents');
-      return { vehicles, accidents };
-
-    } catch (e) {
-      if (e.name === 'AbortError') {
-        console.warn('[YOLO] Timeout');
-        banner('YOLO API timeout', 'warning');
-      } else {
-        console.warn('[YOLO] Network error:', e);
-      }
-      return { vehicles: [], accidents: [] };
     }
   }
 
@@ -522,7 +538,7 @@
       }));
 
       const accidents = preds.filter(p => isAccidentName(p.class));
-      console.log('[Roboflow] Detected:', preds.length, 'objects,', accidents.length, 'accidents');
+      console.log('[Roboflow] Detected:', accidents.length, 'accidents');
       
       return { all: preds, accidents };
 
@@ -532,7 +548,7 @@
     }
   }
 
-  /* ==================== RULE-BASED ACCIDENT DETECTION ==================== */
+  /* ==================== RULE-BASED DETECTION ==================== */
   
   function detectAccidentsByRules(detections) {
     const vehicles = detections.filter(d => 
@@ -543,39 +559,18 @@
 
     const accidents = [];
 
-    // Check for overlapping vehicles
     for (let i = 0; i < vehicles.length; i++) {
       for (let j = i + 1; j < vehicles.length; j++) {
         const iou = calculateIoU(vehicles[i].bbox, vehicles[j].bbox);
-        if (iou > 0.15) { // Significant overlap
-          // Create synthetic accident box
+        if (iou > 0.15) {
           const combinedBox = mergeBoundingBoxes([vehicles[i].bbox, vehicles[j].bbox]);
           accidents.push({
             class: 'accident',
-            score: 0.65, // Rule-based confidence
+            score: 0.65,
             bbox: combinedBox,
             source: 'rule-overlap'
           });
         }
-      }
-    }
-
-    // Check for high density
-    if (vehicles.length >= 3) {
-      const totalArea = vehicles.reduce((sum, v) => 
-        sum + (v.bbox[2] * v.bbox[3]), 0
-      );
-      const frameArea = upW * upH;
-      const density = totalArea / frameArea;
-
-      if (density > 0.25) {
-        const centerBox = calculateCenterBox(vehicles);
-        accidents.push({
-          class: 'accident',
-          score: 0.60,
-          bbox: centerBox,
-          source: 'rule-density'
-        });
       }
     }
 
@@ -623,18 +618,6 @@
     return [minX, minY, maxX - minX, maxY - minY];
   }
 
-  function calculateCenterBox(vehicles) {
-    const boxes = vehicles.map(v => v.bbox);
-    return mergeBoundingBoxes(boxes);
-  }
-
-  function countVehiclesNear(accBox, vehicles, iouThreshold) {
-    if (!accBox) return 0;
-    return vehicles.filter(v => 
-      calculateIoU(accBox.bbox, v.bbox) >= iouThreshold
-    ).length;
-  }
-
   /* ==================== DRAWING ==================== */
   
   function drawBoxes(detections, sx, sy) {
@@ -647,20 +630,17 @@
       const sx_w = w * sx;
       const sy_h = h * sy;
 
-      // Color based on class
-      let color = '#00ff00'; // Green
+      let color = '#00ff00';
       if (det.class === 'accident') {
-        color = '#ff0000'; // Red
+        color = '#ff0000';
       } else if (['car','truck','bus','motorcycle'].includes(det.class)) {
-        color = '#00aaff'; // Blue
+        color = '#00aaff';
       }
 
-      // Draw box
       ctx.strokeStyle = color;
       ctx.lineWidth = 3;
       ctx.strokeRect(sx_x, sy_y, sx_w, sy_h);
 
-      // Draw label
       const label = `${det.class} ${Math.round(det.score * 100)}%`;
       ctx.font = 'bold 14px Arial';
       const textWidth = ctx.measureText(label).width;
@@ -720,11 +700,7 @@
   /* ==================== INITIALIZATION ==================== */
   
   console.log('[Detection] Module loaded');
+  console.log('[Detection] Railway API:', YOLO.apiUrl);
   console.log('[Detection] Initial engine:', ENGINE);
-  
-  // Auto-start if needed (uncomment if you want auto-start)
-  // window.addEventListener('load', () => {
-  //   if (ENGINE !== 'off') startDetection();
-  // });
 
 })();
