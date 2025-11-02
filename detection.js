@@ -10,7 +10,7 @@
   // 🚀 Railway API Configuration (YOLOv11)
   const YOLO = {
     // ✅ เปลี่ยนเป็น Railway API URL ของคุณ
-    apiUrl: 'https://your-app-name.railway.app/detect',  // ⬅️ เปลี่ยนตรงนี้!
+    apiUrl: 'https://pattaya-cctv-map-production.up.railway.app//detect',  // ⬅️ เปลี่ยนตรงนี้!
     imgSize: 640,
     minConfAccident: 0.55,
     minConfVehicle: 0.25,
