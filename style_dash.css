@@ -7,66 +7,51 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     height: 100vh;
-    overflow: hidden;
-    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* ป้องกันการเลื่อนหน้าจอ */
 }
+
+/* Main Container (คอนเทนเนอร์หลัก) */
 
 .main-container {
     position: relative;
+    width: 100vw;
     height: 100vh;
+    overflow: hidden;
 }
+
+/* Sidebar (แถบด้านข้าง) */
 
 .sidebar {
-    position: absolute;
+    width: 380px;
+    background: rgba(255, 255, 255, 0.95); /* พื้นหลังขาวโปร่งแสง */
+    box-shadow: 2px 0 15px rgba(0,0,0,0.15);
+    overflow-y: auto; /* เลื่อนได้ในแนวตั้ง */
+    z-index: 1000;
+    transition: transform 0.3s ease; /* Animation เมื่อเปิด/ปิด */
+    position: fixed;
     left: 0;
     top: 0;
-    width: 380px;
-    height: 100vh;
-    background: white;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.08);
-    overflow-y: auto;
-    z-index: 1000;
-    transition: transform 0.3s;
+    bottom: 0;
+    backdrop-filter: blur(8px); /* เอฟเฟกต์เบลอพื้นหลัง */
+    transform: translateX(0); /* ตำแหน่งเริ่มต้น */
 }
 
+/* สถานะเมื่อ Sidebar ถูกซ่อน */
 .sidebar.collapsed {
-    transform: translateX(-380px);
+    transform: translateX(-100%); /* เลื่อนซ่อนไปทางซ้าย */
 }
+
+/* ====================================== */
+/* Sidebar Header */
+/* ====================================== */
 
 .sidebar-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Gradient สีม่วง */
     color: white;
     padding: 25px 20px;
     position: relative;
-    padding-top: 30px;
-}
-
-.back-btn {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    background: transparent;
-    border: none;
-    color: white !important;
-    width: 25px;
-    height: 25px;
-    border-radius: 0;
-    font-size: 22px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-    font-weight: bold;
-    padding: 0;
-    filter: brightness(1.2);
-    line-height: 1;
-}
-
-.back-btn:hover {
-    transform: translateX(-2px) scale(1.15);
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-    filter: brightness(1.5);
 }
 
 .sidebar-header h2 {
@@ -79,73 +64,218 @@ body {
     opacity: 0.9;
 }
 
-.year-filter {
+/* ปุ่มปิด Sidebar */
+.toggle-sidebar-btn {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%); /* จัดกึ่งกลางแนวตั้ง */
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s;
+}
+
+.toggle-sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ====================================== */
+/* Timeline Section (ส่วนควบคุมไทม์ไลน์) */
+/* ====================================== */
+
+.timeline-section {
     padding: 20px;
-    background: #f8f9fa;
-    border-bottom: 2px solid #e2e8f0;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); /* Gradient สีชมพู */
+    color: white;
 }
 
-.year-filter h3 {
+/* Header แสดงเดือนปัจจุบัน */
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.current-month {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.month-count {
     font-size: 14px;
-    margin-bottom: 12px;
-    color: #2d3748;
-    font-weight: 600;
+    opacity: 0.9;
 }
 
-.year-buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+/* ====================================== */
+/* Timeline Controls (ปุ่มควบคุม) */
+/* ====================================== */
+
+.timeline-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.year-btn {
+.timeline-btn {
+    flex: 1; /* แบ่งพื้นที่เท่าๆ กัน */
     padding: 10px;
-    border: 2px solid #e2e8f0;
-    background: white;
+    border: 2px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.2);
+    color: white;
     border-radius: 8px;
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
-    color: #4a5568;
     transition: all 0.3s;
 }
 
-.year-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
+.timeline-btn:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.8);
 }
 
-.year-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: transparent;
+/* สถานะเมื่อกำลังเล่น Animation */
+.timeline-btn.playing {
+    background: rgba(255,255,255,0.4);
+    animation: pulse 1.5s infinite; /* กระพริบ */
 }
+
+/* Animation กระพริบ */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ====================================== */
+/* Timeline Slider (แถบเลื่อนเลือกเดือน) */
+/* ====================================== */
+
+.timeline-slider {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.slider-container {
+    position: relative;
+    padding: 10px 0;
+}
+
+/* สไตล์ Range Slider */
+input[type="range"].timeline-range {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+/* ลูกบิดของ Slider (WebKit) */
+input[type="range"].timeline-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    background: white;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ====================================== */
+/* Month Markers (เครื่องหมายเดือน) */
+/* ====================================== */
+
+.month-markers {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr); /* แบ่ง 12 คอลัมน์ */
+    gap: 2px;
+    font-size: 9px;
+    margin-top: 8px;
+}
+
+.month-marker {
+    text-align: center;
+    opacity: 0.6;
+    font-weight: 500;
+}
+
+/* เดือนที่ถูกเลือก */
+.month-marker.active {
+    font-weight: 700;
+    opacity: 1;
+    color: #FFD700; /* สีทอง */
+}
+
+/* ====================================== */
+/* Year Selector (ปุ่มเลือกปี) */
+/* ====================================== */
+
+.year-selector {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.year-selector-btn {
+    flex: 1;
+    padding: 8px;
+    border: 2px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.year-selector-btn:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* ปีที่ถูกเลือก */
+.year-selector-btn.active {
+    background: rgba(255,255,255,0.4);
+    border-color: white;
+}
+
+/* ====================================== */
+/* Stats Grid (กริดแสดงสถิติ) */
+/* ====================================== */
 
 .stats-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; /* 2 คอลัมน์ */
     gap: 15px;
     padding: 20px;
 }
 
+/* การ์ดสถิติแต่ละอัน */
 .stat-card {
     background: white;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-left: 4px solid #667eea;
-    transition: transform 0.2s;
+    border-left: 4px solid #667eea; /* แถบสีด้านซ้าย */
+    transition: all 0.3s;
 }
 
 .stat-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-3px); /* ยกขึ้นเล็กน้อย */
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
-.stat-card.danger { border-left-color: #f56565; }
-.stat-card.warning { border-left-color: #ed8936; }
-.stat-card.success { border-left-color: #48bb78; }
-.stat-card.info { border-left-color: #4299e1; }
+/* สีแถบตามประเภท */
+.stat-card.danger { border-left-color: #f56565; }  /* สีแดง - อันตราย */
+.stat-card.warning { border-left-color: #ed8936; } /* สีส้ม - คำเตือน */
+.stat-card.success { border-left-color: #48bb78; } /* สีเขียว - สำเร็จ */
+.stat-card.info { border-left-color: #4299e1; }    /* สีน้ำเงิน - ข้อมูล */
 
 .stat-value {
     font-size: 32px;
@@ -157,8 +287,36 @@ body {
 .stat-label {
     font-size: 12px;
     color: #718096;
-    text-transform: uppercase;
+    text-transform: uppercase; /* ตัวพิมพ์ใหญ่ทั้งหมด */
 }
+
+/* ====================================== */
+/* Stat Trend Indicator (ตัวบอกแนวโน้ม) */
+/* ====================================== */
+
+.stat-trend {
+    font-size: 11px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-trend.up {
+    color: #f56565; /* แดง - เพิ่มขึ้น */
+}
+
+.stat-trend.down {
+    color: #48bb78; /* เขียว - ลดลง */
+}
+
+.stat-trend.neutral {
+    color: #718096; /* เทา - คงที่ */
+}
+
+/* ====================================== */
+/* Control Section (ส่วนควบคุมการแสดงผล) */
+/* ====================================== */
 
 .control-section {
     padding: 20px;
@@ -170,6 +328,18 @@ body {
     font-weight: 600;
     color: #2d3748;
     margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* แถบสีก่อนหัวข้อ */
+.section-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: #667eea;
+    margin-right: 8px;
+    border-radius: 2px;
 }
 
 .control-group {
@@ -187,8 +357,12 @@ body {
 .control-group label span {
     color: #667eea;
     font-weight: 700;
-    float: right;
+    float: right; /* ชิดขวา */
 }
+
+/* ====================================== */
+/* Range Slider (แถบเลื่อนปรับค่า) */
+/* ====================================== */
 
 input[type="range"] {
     width: 100%;
@@ -209,6 +383,50 @@ input[type="range"]::-webkit-slider-thumb {
     box-shadow: 0 2px 4px rgba(102, 126, 234, 0.4);
 }
 
+/* ====================================== */
+/* Back Home Button (ปุ่มกลับหน้าหลัก) */
+/* ====================================== */
+
+.back-home-btn {
+    position: fixed;
+    top: 10px;
+    left: 390px;
+    z-index: 999;
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-home-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.back-home-btn span:first-child {
+    font-size: 16px;
+}
+
+/* เมื่อ sidebar ปิด ให้ปุ่มเลื่อนมาซ้าย */
+.sidebar.collapsed ~ .map-container .back-home-btn {
+    left: 20px;
+}
+
+/* ====================================== */
+/* Control Buttons (ปุ่มควบคุมทั่วไป) */
+/* ====================================== */
+
 .btn-control {
     width: 100%;
     padding: 12px;
@@ -225,6 +443,7 @@ input[type="range"]::-webkit-slider-thumb {
     gap: 8px;
 }
 
+/* ปุ่มหลัก (สีม่วง) */
 .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -235,6 +454,7 @@ input[type="range"]::-webkit-slider-thumb {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+/* ปุ่มรอง (สีเทา) */
 .btn-secondary {
     background: #e2e8f0;
     color: #4a5568;
@@ -244,6 +464,7 @@ input[type="range"]::-webkit-slider-thumb {
     background: #cbd5e0;
 }
 
+/* ปุ่ม Analytics (สีชมพู) */
 .btn-analytics {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     color: white;
@@ -254,17 +475,75 @@ input[type="range"]::-webkit-slider-thumb {
     box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
 }
 
-.btn-back {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+/* ====================================== */
+/* Speed Control (ควบคุมความเร็ว) */
+/* ====================================== */
+
+.speed-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+}
+
+.speed-label {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 80px;
+}
+
+.speed-options {
+    display: flex;
+    gap: 5px;
+    flex: 1;
+}
+
+.speed-btn {
+    flex: 1;
+    padding: 6px 10px;
+    border: 2px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.3s;
     color: white;
 }
 
-.btn-back:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+.speed-btn:hover {
+    border-color: white;
+    background: rgba(255,255,255,0.25);
 }
 
+.speed-btn.active {
+    background: rgba(255,255,255,0.4);
+    border-color: white;
+}
+
+/* ====================================== */
+/* Map Container (พื้นที่แผนที่) */
+/* ====================================== */
+
 .map-container {
+    position: fixed;
+    left: 120px; /* เริ่มจากขวา sidebar */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    transition: left 0.3s ease;
+}
+
+/* เมื่อ sidebar ปิด แผนที่ขยายเต็มจอ */
+.sidebar.collapsed ~ .map-container {
+    left: 0;
+}
+
+#map {
     position: absolute;
     left: 0;
     top: 0;
@@ -272,82 +551,93 @@ input[type="range"]::-webkit-slider-thumb {
     height: 100%;
 }
 
-#map {
-    width: 100%;
-    height: 100%;
+/* ====================================== */
+/* Map Controls Left (ปุ่มฝั่งซ้าย) */
+/* ====================================== */
+
+.map-controls-left {
+    position: fixed;
+    left: 400px;
+    top: 60px;
+    z-index: 999;
+    transition: left 0.3s ease;
 }
 
-.toggle-sidebar-btn {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    z-index: 1001;
-    background: transparent;
+/* เมื่อ sidebar ปิด ปุ่มเลื่อนมาซ้าย */
+.sidebar.collapsed ~ .map-container .map-controls-left {
+    left: 10px;
+}
+
+.control-btn-left {
+    width: 44px;
+    height: 44px;
+    background: white;
     border: none;
-    color: white !important;
-    width: 30px;
-    height: 30px;
-    border-radius: 0;
-    font-size: 32px;
+    border-radius: 8px;
     cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    font-size: 20px;
+    transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
-    font-weight: 300;
-    padding: 0;
-    filter: brightness(1.2);
-    line-height: 1;
+    font-weight: normal;
 }
 
-.toggle-sidebar-btn:hover {
-    transform: rotate(90deg) scale(1.15);
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-    filter: brightness(1.5);
+.control-btn-left:hover {
+    background: #f7fafc;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
 }
 
-.toggle-open-btn {
-    position: absolute;
-    top: 100px;
-    left: 10px;
+.hamburger-icon {
+    font-size: 22px;
+    color: #5f6368;
+}
+
+/* ====================================== */
+/* Map Controls (ปุ่มซูมแผนที่) */
+/* ====================================== */
+
+.map-controls {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
     z-index: 999;
+    display: flex;
+    flex-direction: column; /* เรียงแนวตั้ง */
+    gap: 10px;
+}
+
+.control-btn {
+    width: 50px;
+    height: 50px;
     background: white;
     border: none;
-    padding: 12px 15px;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    font-size: 18px;
+    font-size: 20px;
     transition: all 0.3s;
-    opacity: 0;
-    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
 }
 
-.toggle-open-btn:hover {
-    transform: scale(1.1);
+.control-btn:hover {
+    transform: scale(1.05); /* ขยายเล็กน้อย */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: #f7fafc;
 }
 
-.sidebar.collapsed ~ .map-container .toggle-open-btn {
-    opacity: 1;
-    pointer-events: all;
-}
-
-/* ปุ่ม Zoom ใช้ตำแหน่งเดิมของ Leaflet */
-.leaflet-top.leaflet-left {
-    top: 20px !important;
-    bottom: auto;
-    left: auto !important;
-    right: 20px;
-}
-
-.sidebar.collapsed ~ .map-container .leaflet-top.leaflet-left {
-    right: 20px;
-}
+/* ====================================== */
+/* Legend (คำอธิบายสี Heatmap) */
+/* ====================================== */
 
 .legend {
     position: absolute;
     bottom: 30px;
-    right: 30px;
+    left: 30px;
     z-index: 1000;
     background: white;
     padding: 15px 20px;
@@ -362,10 +652,11 @@ input[type="range"]::-webkit-slider-thumb {
     color: #2d3748;
 }
 
+/* แถบ Gradient แสดงระดับความหนาแน่น */
 .legend-gradient {
     width: 200px;
     height: 12px;
-    background: linear-gradient(to right, #4299e1, #48bb78, #ed8936, #f56565);
+    background: linear-gradient(to right, #372fd4, #39ab46, #FFFF00, #FF0000);
     border-radius: 6px;
     margin-bottom: 8px;
 }
@@ -377,59 +668,89 @@ input[type="range"]::-webkit-slider-thumb {
     color: #718096;
 }
 
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+/* ====================================== */
+/* Time Info (กล่องแสดงข้อมูลเวลา) */
+/* ====================================== */
+
+.time-info {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    z-index: 1000;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 200px;
 }
 
-.loading-overlay.hidden {
-    display: none !important;
+.time-info-month {
+    font-size: 24px;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 5px;
 }
 
-.loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #667eea;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
+.time-info-count {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 8px;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.time-info-trend {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
 }
+
+.time-info-trend.up {
+    background: #fed7d7; /* พื้นหลังแดงอ่อน */
+    color: #c53030;      /* ข้อความแดงเข้ม */
+}
+
+.time-info-trend.down {
+    background: #c6f6d5; /* พื้นหลังเขียวอ่อน */
+    color: #276749;      /* ข้อความเขียวเข้ม */
+}
+
+.time-info-trend.neutral {
+    background: #e2e8f0; /* พื้นหลังเทา */
+    color: #4a5568;      /* ข้อความเทาเข้ม */
+}
+
+/* ====================================== */
+/* Dashboard Modal (หน้าต่าง Analytics) */
+/* ====================================== */
 
 .dashboard-modal {
-    display: none;
+    display: none; /* ซ่อนไว้เริ่มต้น */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.7); /* พื้นหลังมืดโปร่งแสง */
     z-index: 2000;
     animation: fadeIn 0.3s;
 }
 
+/* แสดง Modal */
 .dashboard-modal.active {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+/* Animation เฟดอิน */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* ====================================== */
+/* Dashboard Content */
+/* ====================================== */
 
 .dashboard-content {
     background: white;
@@ -443,6 +764,7 @@ input[type="range"]::-webkit-slider-thumb {
     flex-direction: column;
 }
 
+/* Animation เลื่อนขึ้น */
 @keyframes slideUp {
     from { transform: translateY(50px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
@@ -461,34 +783,39 @@ input[type="range"]::-webkit-slider-thumb {
     font-size: 24px;
 }
 
+/* ปุ่มปิด Modal */
 .close-btn {
     background: rgba(255,255,255,0.2);
     border: none;
     color: white;
-    font-size: 32px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     cursor: pointer;
-    padding: 5px 15px;
-    border-radius: 8px;
+    font-size: 20px;
     transition: all 0.3s;
 }
 
 .close-btn:hover {
     background: rgba(255,255,255,0.3);
-    transform: rotate(90deg);
+    transform: rotate(90deg); /* หมุน 90 องศา */
 }
 
 .dashboard-body {
-    flex: 1;
-    overflow-y: auto;
     padding: 30px;
-    background: #f7fafc;
+    overflow-y: auto; /* เลื่อนได้ในแนวตั้ง */
+    flex: 1;
 }
+
+/* ====================================== */
+/* Charts Grid (กริดกราฟ) */
+/* ====================================== */
 
 .charts-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์ */
     gap: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .chart-card {
@@ -498,26 +825,46 @@ input[type="range"]::-webkit-slider-thumb {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* การ์ดที่ขยายเต็มความกว้าง */
 .chart-card.full {
     grid-column: 1 / -1;
 }
+
+/* เพิ่มโค้ดนี้เข้าไปในไฟล์ CSS ของคุณ */
+.chart-container canvas {
+    width: 100% !important; 
+    height: 100% !important;
+}
+
 
 .chart-card h3 {
     font-size: 16px;
     color: #2d3748;
     margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .chart-container {
     position: relative;
     height: 300px;
 }
+/* เพิ่มในไฟล์ CSS ของคุณ */
+.chart-container canvas {
+    /* ทำให้ Canvas ขยายเต็มความกว้างและความสูงของคอนเทนเนอร์ */
+    width: 100% !important; 
+    height: 100% !important;
+}
+
+/* ====================================== */
+/* Info Grid (กริดข้อมูลสถิติ) */
+/* ====================================== */
 
 .info-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr); /* 3 คอลัมน์ */
     gap: 20px;
-    margin-top: 20px;
 }
 
 .info-card {
@@ -531,6 +878,7 @@ input[type="range"]::-webkit-slider-thumb {
     font-size: 14px;
     color: #718096;
     margin-bottom: 15px;
+    font-weight: 600;
 }
 
 .info-item {
@@ -543,4 +891,64 @@ input[type="range"]::-webkit-slider-thumb {
 
 .info-item:last-child {
     border-bottom: none;
+}
+
+.info-item-label {
+    color: #4a5568;
+}
+
+.info-item-value {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* ====================================== */
+/* Responsive Design (รองรับมือถือ) */
+/* ====================================== */
+
+@media (max-width: 768px) {
+    /* Sidebar เต็มหน้าจอบนมือถือ */
+    .sidebar {
+        width: 100%;
+        transform: translateX(-100%);
+    }
+    
+    .sidebar:not(.collapsed) {
+        transform: translateX(0);
+    }
+    
+    /* แผนที่เต็มจอเสมอ */
+    .map-container {
+        left: 0 !important;
+    }
+    
+    .map-controls-left {
+        left: 10px !important;
+    }
+    
+    /* กราฟและข้อมูลแสดง 1 คอลัมน์ */
+    .charts-grid, .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* ปรับขนาดกล่องข้อมูล */
+    .time-info {
+        top: 15px;
+        left: 15px;
+        padding: 12px 15px;
+    }
+
+    .time-info-month {
+        font-size: 18px;
+    }
+
+    .legend {
+        bottom: 15px;
+        left: 15px;
+        padding: 12px 15px;
+    }
+
+    .legend-gradient {
+        width: 150px;
+    }
 }
