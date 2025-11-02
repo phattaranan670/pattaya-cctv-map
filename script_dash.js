@@ -35,7 +35,7 @@ function loadData() {
         loadingStatus.textContent = 'กำลังเชื่อมต่อ API...'; 
     }
     
-    const url = 'https://pattaya-cctv-kku.infinityfreeapp.com/get_heatmap_data.php?limit=1000';
+    const url = '/get_heatmap_data.php';
 
     fetch(url, {
         method: 'GET',
