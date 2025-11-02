@@ -11,17 +11,13 @@
   <!-- Leaflet styles -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
-
   <!-- App styles -->
-  <link rel="stylesheet" href="style.css" />
-
+  <link rel="stylesheet" href="css/style.css" />
   <!-- Map libs -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
-
   <!-- HLS -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.14/dist/hls.min.js"></script>
-
   <!-- TF.js + COCO-SSD (โหลดไว้ให้ fallback local) -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
@@ -34,15 +30,14 @@
     <!-- Controls -->
     <div id="controls" role="group" aria-label="แผงควบคุม">
       <input id="searchInput" type="search" placeholder="ค้นหาชื่อกล้อง..." aria-label="ค้นหาชื่อกล้อง" />
-
-      <button class="btn" id="zoomOutBtn" title="ซูมออกไประดับเมือง">เมืองพัทยา</button>
-
+      <button class="btn" id="zoomOutBtn" onclick="zoomOut()" title="ซูมออกไประดับเมือง">เมืองพัทยา</button>
+      <button class="btn" onclick="window.location.href='dashboard.html'">Dashboard</button>
       <!-- Detection controls -->
       <button class="btn" id="detectionBtn" title="เริ่ม/หยุด การตรวจจับ">🚨 Detection</button>
       <select class="btn" id="engineSelect" title="เลือกเอนจินตรวจจับ">
         <option value="local" selected>Local (COCO-SSD/YOLO auto)</option>
-        <option value="roboflow">Roboflow (API)</option>
-        <option value="both">Both (COCO + Roboflow)</option>
+        <option value="roboflow">Roboflow API</option>
+        <option value="both">YOLO</option>
         <option value="off">ปิดการตรวจจับ</option>
       </select>
 
@@ -52,24 +47,21 @@
         <option value="1000" selected>1s</option>
         <option value="2000">2s</option>
       </select>
-
-      <label class="btn" title="เปิดเสียงเตือน">
+	  <button class="btn" id="exportBtn" onclick="exportJSON()" title="ส่งออกรายการกล้อง">Export JSON</button>
+        
+      <!--<label class="btn" title="เปิดเสียงเตือน">
         <input id="beepToggle" type="checkbox" checked /> Beep
       </label>
-
-      <button class="btn" id="importBtn" title="นำเข้ารายการกล้อง (.json)">Import JSON</button>
-      <button class="btn" id="exportBtn" title="ส่งออกรายการกล้อง">Export JSON</button>
-
-      <a class="btn" href="dashboard.html" title="ดู Heatmap/Analytics">เปิด Heatmap/Analytics</a>
+      <button class="btn" id="importBtn" title="นำเข้ารายการกล้อง (.json)">Import JSON</button>-->
     </div>
   </header>
 
-  <!-- Main -->
+  <!-- Main Container-->
   <main id="mainContainer" role="main" aria-label="หน้าหลัก">
-    <!-- Map -->
-    <section id="mapSection" class="panel" aria-label="แผนที่กล้อง">
+    <!-- Map Section-->
+    <section id="mapSection" class="panel" aria-label="แผนที่">
       <div id="basemapSelector">
-        <label for="basemapSelect" class="sr-only">แผนที่ฐาน</label>
+        <label for="basemapSelect" class="sr-only"></label>
         <select id="basemapSelect">
           <option value="satellite">Satellite</option>
           <option value="street">Street Map</option>
@@ -85,6 +77,7 @@
           <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
         </svg>
       </button>
+      <button id="toggleBtn" title="แสดงขอบเขตเมืองพัทยา">ขอบเขตพัทยา</button>
 
       <!-- MiniMap placeholder -->
       <div id="miniMap" aria-hidden="true"></div>
@@ -92,32 +85,22 @@
 
     <!-- Right: CCTV + List -->
     <aside id="rightSidebar" aria-label="ภาพสดและรายการกล้อง">
-
       <section id="videoPreview" class="panel" aria-label="ภาพสด">
         <div class="header-row">
           <h2>CCTV LIVE</h2>
+          <div id="locationLabel" class="chip">ตำแหน่งกล้อง</div>
           <div class="status">
-            <span id="statusBadge" class="chip muted">พร้อม</span>
+            <span id="statusBadge" class="chip muted"></span>
           </div>
         </div>
-
-        <div id="locationLabel" class="chip">ตำแหน่งกล้อง</div>
 
         <div class="video-wrap">
           <!-- วิดีโอสด -->
           <video id="videoPlayer" autoplay muted playsinline crossorigin="anonymous"></video>
           <!-- แคนวาสวาดกรอบ/ผลตรวจจับ -->
           <canvas id="overlay"></canvas>
-
           <!-- ป้ายเตือน -->
           <div id="alertBanner" class="alert hidden"></div>
-        </div>
-
-        <!-- Tools ใต้จอ -->
-        <div class="video-tools">
-          <button id="muteBtn" class="btn" title="สลับเสียง 🔇/🔊">🔇 Mute</button>
-          <button id="screenshotBtn" class="btn" title="จับภาพหน้าจอ 📸">📸 Screenshot</button>
-          <a id="rawLink" class="btn" href="#" target="_blank" rel="noopener" title="เปิดลิงก์สตรีมต้นฉบับ">Open RAW</a>
         </div>
       </section>
 
@@ -128,26 +111,13 @@
     </aside>
   </main>
 
-  <div class="view-switch">
-    <button class="chip" onclick="setCamView('list')">📋 List</button>
-    <button class="chip" onclick="setCamView('grid')">🧱 Grid</button>
-    <button class="chip" onclick="setCamView('compact')">📏 Compact</button>
-  </div>
-
   <!-- Hidden input สำหรับ Import JSON -->
   <input id="importFile" type="file" accept="application/json" hidden />
-
   <!-- ===== SCRIPTS (ลำดับสำคัญ) ===== -->
   <script src="script.js"></script> <!-- แผนที่/เล่นวิดีโอ + ผูกอีเวนต์ทั้งหมด -->
-
   <!-- ONNX Runtime: ต้องมาก่อน detection.js เพื่อให้ YOLOv8 (ONNX) ใช้ได้ -->
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
-
-  <!-- ตรวจจับ + วาดกรอบ -->
-  <script src="detection.js?v=20251027"></script>
-
-  <!-- ตรรกะจับเหตุ/แจ้งเตือน (ถ้าใช้) -->
-  <script src="accident.js"></script>
+  <script src="detection.js?v=20251027"></script> <!-- ตรวจจับ + วาดกรอบ -->
+  <script src="accident.js"></script> <!-- ตรรกะจับเหตุ/แจ้งเตือน (ถ้าใช้) -->
 </body>
 </html>
-
