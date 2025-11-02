@@ -24,7 +24,7 @@ body {
 /* Sidebar (แถบด้านข้าง) */
 
 .sidebar {
-    width: 380px;
+    width: 360px;
     background: rgba(255, 255, 255, 0.95); /* พื้นหลังขาวโปร่งแสง */
     box-shadow: 2px 0 15px rgba(0,0,0,0.15);
     overflow-y: auto; /* เลื่อนได้ในแนวตั้ง */
@@ -390,7 +390,7 @@ input[type="range"]::-webkit-slider-thumb {
 .back-home-btn {
     position: fixed;
     top: 10px;
-    left: 390px;
+    left: 370px;
     z-index: 999;
     background: white;
     border: 2px solid #667eea;
@@ -420,7 +420,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* เมื่อ sidebar ปิด ให้ปุ่มเลื่อนมาซ้าย */
 .sidebar.collapsed ~ .map-container .back-home-btn {
-    left: 20px;
+    left: 10px;
 }
 
 /* ====================================== */
@@ -557,8 +557,8 @@ input[type="range"]::-webkit-slider-thumb {
 
 .map-controls-left {
     position: fixed;
-    left: 400px;
-    top: 60px;
+    left: 370px;
+    top: 100px;
     z-index: 999;
     transition: left 0.3s ease;
 }
@@ -594,41 +594,7 @@ input[type="range"]::-webkit-slider-thumb {
     color: #5f6368;
 }
 
-/* ====================================== */
-/* Map Controls (ปุ่มซูมแผนที่) */
-/* ====================================== */
 
-.map-controls {
-    position: fixed;
-    bottom: 100px;
-    right: 20px;
-    z-index: 999;
-    display: flex;
-    flex-direction: column; /* เรียงแนวตั้ง */
-    gap: 10px;
-}
-
-.control-btn {
-    width: 50px;
-    height: 50px;
-    background: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    font-size: 20px;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-.control-btn:hover {
-    transform: scale(1.05); /* ขยายเล็กน้อย */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    background: #f7fafc;
-}
 
 /* ====================================== */
 /* Legend (คำอธิบายสี Heatmap) */
@@ -636,8 +602,8 @@ input[type="range"]::-webkit-slider-thumb {
 
 .legend {
     position: absolute;
-    bottom: 30px;
-    left: 30px;
+    bottom: 20px;
+    right: 10px;
     z-index: 1000;
     background: white;
     padding: 15px 20px;
