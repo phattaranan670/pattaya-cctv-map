@@ -7,6 +7,7 @@ $whitelist = [
   'http://127.0.0.1:5500',
   'http://localhost:3000',
   'https://pattaya-cctv-kku.infinityfreeapp.com',
+  'https://phattaranan670.github.io/pattaya-cctv-map/'
   'null' // กรณีเปิดไฟล์แบบ file://
 ];
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : 'null';
