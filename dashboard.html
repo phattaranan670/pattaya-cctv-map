@@ -1,0 +1,357 @@
+html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard อุบัติเหตุ Time Series - พัทยา</title>
+    
+    <!-- ====================================== -->
+    <!-- External Libraries (ไลบรารีภายนอก) -->
+    <!-- ====================================== -->
+    
+    <!-- Leaflet CSS - สำหรับแสดงแผนที่ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    
+    <!-- Leaflet JS - สำหรับควบคุมแผนที่ -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    
+    <!-- Chart.js - สำหรับสร้างกราฟและแผนภูมิ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Leaflet Heat - สำหรับสร้าง Heatmap บนแผนที่ -->
+    <script src="https://cdn.jsdelivr.net/gh/python-visualization/folium@main/folium/templates/leaflet_heat.min.js"></script>
+    
+    <!-- Custom CSS - ไฟล์ CSS ที่กำหนดเอง -->
+    <link rel="stylesheet" href="css/style_dash.css">
+</head>
+<body>
+
+<!-- ====================================== -->
+<!-- Main Container (คอนเทนเนอร์หลัก) -->
+<!-- ====================================== -->
+<div class="main-container">
+    
+    <!-- ====================================== -->
+    <!-- Sidebar (แถบด้านข้าง) -->
+    <!-- ====================================== -->
+    <div class="sidebar" id="sidebar">
+        
+        <!-- Header ของ Sidebar -->
+        <div class="sidebar-header">
+            <h2> Dashboard</h2>
+            <p>พื้นที่: พัทยา (2022-2024)</p>
+            
+            <!-- ปุ่มปิด Sidebar -->
+            <button class="toggle-sidebar-btn" id="toggleSidebar"><span>✖</span></button>
+        </div>
+        
+        <!-- ====================================== -->
+        <!-- Timeline Section (ส่วนควบคุมไทม์ไลน์) -->
+        <!-- ====================================== -->
+        <div class="timeline-section">
+            
+            <!-- แสดงเดือนและปีปัจจุบัน -->
+            <div class="timeline-header">
+                    <div class="current-month" id="currentMonth">มกราคม 2022</div>
+                    <div class="month-count" id="monthCount">เดือนที่ 1 จาก 36</div>
+                
+            </div>
+            
+            <!-- ปุ่มควบคุมการเล่น Timeline -->
+            <div class="timeline-controls">
+                <button class="timeline-btn" id="prevMonth">◀ ก่อนหน้า</button>
+                <button class="timeline-btn" id="playPause">▶ เล่น</button>
+                <button class="timeline-btn" id="nextMonth">ถัดไป ▶</button>
+            </div>
+            
+            <!-- Slider สำหรับเลือกเดือน -->
+            <div class="slider-container">
+                <input type="range" class="timeline-range" id="timelineSlider" 
+                       min="0" max="35" value="0" step="1">
+                
+                <!-- แสดงเครื่องหมายเดือนทั้ง 12 เดือน -->
+                <div class="month-markers" id="monthMarkers">
+                    <div class="month-marker active">ม.ค.</div>
+                    <div class="month-marker">ก.พ.</div>
+                    <div class="month-marker">มี.ค.</div>
+                    <div class="month-marker">เม.ย.</div>
+                    <div class="month-marker">พ.ค.</div>
+                    <div class="month-marker">มิ.ย.</div>
+                    <div class="month-marker">ก.ค.</div>
+                    <div class="month-marker">ส.ค.</div>
+                    <div class="month-marker">ก.ย.</div>
+                    <div class="month-marker">ต.ค.</div>
+                    <div class="month-marker">พ.ย.</div>
+                    <div class="month-marker">ธ.ค.</div>
+                </div>
+            </div>
+
+            <!-- ปุ่มเลือกกรองตามปี -->
+            <div class="year-selector">
+                <button class="year-selector-btn active" data-year="all">ทั้งหมด</button>
+                <button class="year-selector-btn" data-year="2022">2022</button>
+                <button class="year-selector-btn" data-year="2023">2023</button>
+                <button class="year-selector-btn" data-year="2024">2024</button>
+            </div>
+
+            <!-- ควบคุมความเร็วในการเล่น Animation -->
+            <div class="speed-control">
+                <div class="speed-label">ความเร็ว:</div>
+                <div class="speed-options">
+                    <button class="speed-btn" data-speed="1500">0.5x</button>
+                    <button class="speed-btn active" data-speed="800">1x</button>
+                    <button class="speed-btn" data-speed="400">2x</button>
+                    <button class="speed-btn" data-speed="200">4x</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ====================================== -->
+        <!-- Stats Grid (กริดแสดงสถิติ) -->
+        <!-- ====================================== -->
+        <div class="stats-grid">
+            
+            <!-- การ์ดแสดงจำนวนอุบัติเหตุในเดือนปัจจุบัน -->
+            <div class="stat-card danger">
+                <div class="stat-value" id="monthAccidents">0</div>
+                <div class="stat-label">อุบัติเหตุเดือนนี้</div>
+                <div class="stat-trend neutral" id="trendIndicator">
+                    <span>—</span>
+                    <span>เดือนแรก</span>
+                </div>
+            </div>
+            
+            <!-- การ์ดแสดงจำนวนสะสม -->
+            <div class="stat-card warning">
+                <div class="stat-value" id="cumulativeAccidents">0</div>
+                <div class="stat-label">สะสมถึงเดือนนี้</div>
+            </div>
+            
+            <!-- การ์ดแสดงความคืบหน้าของปี -->
+            <div class="stat-card info">
+                <div class="stat-value" id="yearProgress">8%</div>
+                <div class="stat-label">ความคืบหน้า</div>
+            </div>
+            
+            <!-- การ์ดเปรียบเทียบกับค่าเฉลี่ย -->
+            <div class="stat-card success">
+                <div class="stat-value" id="avgComparison">0.0</div>
+                <div class="stat-label">เทียบค่าเฉลี่ย</div>
+            </div>
+        </div>
+        
+        <!-- ====================================== -->
+        <!-- Control Section (ส่วนควบคุมการแสดงผล) -->
+        <!-- ====================================== -->
+        <div class="control-section">
+            <div class="section-title">ตั้งค่าการแสดงผล</div>
+            
+            <!-- กลุ่มปุ่มควบคุมหลัก -->
+            <div class="control-group">
+                <!-- ปุ่มเปิด Analytics Dashboard -->
+                <button id="viewAnalytics" class="btn-control btn-analytics">
+                    <span></span>
+                    <span>Analytics Dashboard</span>
+                </button>
+                
+                <!-- ปุ่มเปิด/ปิด Heatmap -->
+                <button id="toggleHeatmap" class="btn-control btn-primary">
+                    <span></span>
+                    <span>ซ่อน Heatmap</span>
+                </button>
+                
+                <!-- ปุ่มรีเซ็ตมุมมองแผนที่ -->
+                <button id="resetView" class="btn-control btn-secondary">
+                    <span>🔄</span>
+                    <span>รีเซ็ตมุมมอง</span>
+                </button>
+            </div>
+            
+            <!-- Slider ปรับรัศมีของ Heatmap -->
+            <div class="control-group">
+                <div class="control-label">รัศมี: <span id="radiusValue">20</span> px</div>
+                <input type="range" id="radiusSlider" min="5" max="50" value="20">
+            </div>
+            
+            <!-- Slider ปรับความเบลอของ Heatmap -->
+            <div class="control-group">
+                <div class="control-label">ความเบลอ: <span id="blurValue">20</span></div>
+                <input type="range" id="blurSlider" min="5" max="30" value="20">
+            </div>
+            
+            <!-- Slider ปรับความโปร่งใสของ Heatmap -->
+            <div class="control-group">
+                <div class="control-label">ความโปร่งใส: <span id="opacityValue">60</span>%</div>
+                <input type="range" id="opacitySlider" min="10" max="100" value="60">
+            </div>
+        </div>
+    </div>
+    
+    <!-- ====================================== -->
+    <!-- Map Container (คอนเทนเนอร์แผนที่) -->
+    <!-- ====================================== -->
+    <div class="map-container">
+        <!-- พื้นที่แสดงแผนที่ Leaflet -->
+        <div id="map"></div>
+        
+        <!-- ปุ่มกลับหน้าหลัก -->
+        <div class="back-home-container">
+            <button class="back-home-btn" id="backHome" onclick="window.location.href='index.html'">
+                <span></span>
+                <span>กลับหน้าหลัก</span>
+            </button>
+        </div>
+
+        <!-- ปุ่มควบคุมฝั่งซ้าย (เปิด/ปิด Sidebar บนมือถือ) -->
+        <div class="map-controls-left">
+            <button class="control-btn-left" id="toggleDesktop" title="เปิด/ปิด Sidebar">
+                <span class="hamburger-icon">☰</span>
+            </button>
+        </div>
+        
+        <!-- ปุ่มซูมแผนที่ -->
+        <div class="map-controls">
+            <button class="control-btn" id="zoomIn" title="ซูมเข้า">+</button>
+            <button class="control-btn" id="zoomOut" title="ซูมออก">−</button>
+        </div>
+        
+        <!-- คำอธิบายสีของ Heatmap -->
+        <div class="legend">
+            <h5>ความหนาแน่นอุบัติเหตุ</h5>
+            <div class="legend-gradient"></div>
+            <div class="legend-labels">
+                <span>น้อย</span>
+                <span>ปานกลาง</span>
+                <span>มาก</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====================================== -->
+<!-- Dashboard Modal (หน้าต่าง Analytics) -->
+<!-- ====================================== -->
+<div class="dashboard-modal" id="dashboardModal">
+    <div class="dashboard-content">
+        
+        <!-- Header ของ Dashboard -->
+        <div class="dashboard-header">
+            <h2>Time Series Analytics - อุบัติเหตุพัทยา (2022-2024)</h2>
+            <button class="close-btn" id="closeDashboard">×</button>
+        </div>
+        
+        <!-- เนื้อหาหลักของ Dashboard -->
+        <div class="dashboard-body">
+            
+            <!-- กริดแสดงกราฟและแผนภูมิต่างๆ -->
+            <div class="charts-grid">
+                
+                <!-- กราฟแนวโน้มรายเดือน (แบบเต็มความกว้าง) -->
+                <div class="chart-card full">
+                    <h3>📈 แนวโน้มอุบัติเหตุรายเดือน (2022-2024)</h3>
+                    <div class="chart-container">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- กราฟเปรียบเทียบรายปี -->
+                <div class="chart-card">
+                    <h3>การเปรียบเทียบรายปี</h3>
+                    <div class="chart-container">
+                        <canvas id="yearlyChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- กราฟวงกลมแสดงสัดส่วน -->
+                <div class="chart-card">
+                    <h3> สัดส่วนตามช่วงเวลา</h3>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- กราฟ Moving Average -->
+                <div class="chart-card">
+                    <h3> Moving Average (3 เดือน)</h3>
+                    <div class="chart-container">
+                        <canvas id="maChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Heatmap รายเดือน -->
+                <div class="chart-card">
+                    <h3>Heatmap รายเดือน</h3>
+                    <div class="chart-container">
+                        <canvas id="heatmapChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ====================================== -->
+            <!-- Info Grid (กริดแสดงข้อมูลสถิติ) -->
+            <!-- ====================================== -->
+            <div class="info-grid">
+                
+                <!-- การ์ดสถิติรวม -->
+                <div class="info-card">
+                    <h4> สถิติรวม</h4>
+                    <div class="info-item">
+                        <span class="info-item-label">รวมทั้งหมด</span>
+                        <span class="info-item-value" id="totalAll">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">ค่าเฉลี่ยต่อเดือน</span>
+                        <span class="info-item-value" id="avgMonth">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">ส่วนเบี่ยงเบนมาตรฐาน</span>
+                        <span class="info-item-value" id="stdDev">0</span>
+                    </div>
+                </div>
+                
+                <!-- การ์ดค่าสูงสุด/ต่ำสุด -->
+                <div class="info-card">
+                    <h4> ค่าสูงสุด/ต่ำสุด</h4>
+                    <div class="info-item">
+                        <span class="info-item-label">เดือนที่มีมากสุด</span>
+                        <span class="info-item-value" id="maxMonth">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">จำนวน</span>
+                        <span class="info-item-value" id="maxValue">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">เดือนที่มีน้อยสุด</span>
+                        <span class="info-item-value" id="minMonth">-</span>
+                    </div>
+                </div>
+                
+                <!-- การ์ดแนวโน้ม -->
+                <div class="info-card">
+                    <h4> แนวโน้ม</h4>
+                    <div class="info-item">
+                        <span class="info-item-label">แนวโน้มโดยรวม</span>
+                        <span class="info-item-value" id="overallTrend">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">การเปลี่ยนแปลง YoY</span>
+                        <span class="info-item-value" id="yoyChange">0%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">ความแปรปรวน</span>
+                        <span class="info-item-value" id="variance">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================- -->
+<!-- Custom JavaScript (ไฟล์ JS หลัก) -->
+<!-- ====================================== -->
+<script src="script_dash.js"></script>
+
+</body>
+</html>
