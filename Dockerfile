@@ -1,21 +1,28 @@
-# ✅ ใช้ PHP 8.2 พร้อม Apache เป็น base
-FROM php:8.2-apache
+# Base image: Debian + Python + Apache + PHP
+FROM python:3.11-slim
 
-# ✅ ติดตั้ง Python3 + pip
-RUN apt-get update && apt-get install -y python3 python3-pip
+# ติดตั้ง PHP, Apache และ dependencies
+RUN apt-get update && apt-get install -y \
+    apache2 \
+    php \
+    libapache2-mod-php \
+    && apt-get clean
 
-# ✅ ติดตั้งโมดูล YOLO และ torch
+# สร้าง virtual environment สำหรับ Python
+RUN python3 -m venv /venv
+ENV PATH="/venv/bin:$PATH"
+
+# ติดตั้ง YOLO และ library ที่ต้องใช้
 RUN pip install ultralytics torch torchvision opencv-python
 
-# ✅ ตั้ง working directory
-WORKDIR /var/www/html
-
-# ✅ คัดลอกทุกไฟล์จากโปรเจกต์เข้า container
+# คัดลอกไฟล์เว็บทั้งหมด
 COPY . /var/www/html/
 
-# ✅ เปิดพอร์ต 80 (Render จะ map พอร์ตนี้อัตโนมัติ)
+# กำหนด working directory
+WORKDIR /var/www/html
+
+# เปิดพอร์ต 80
 EXPOSE 80
 
-# ✅ เริ่มรัน Apache server
+# รัน Apache
 CMD ["apache2-foreground"]
-
